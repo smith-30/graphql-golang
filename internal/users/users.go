@@ -2,9 +2,10 @@ package users
 
 import (
 	"database/sql"
-	"github.com/glyphack/graphlq-golang/internal/pkg/db/mysql"
-	"golang.org/x/crypto/bcrypt"
 	"log"
+
+	database "github.com/glyphack/graphlq-golang/internal/pkg/db/mysql"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {

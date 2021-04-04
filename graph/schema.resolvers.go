@@ -5,32 +5,40 @@ package graph
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 
 	"github.com/glyphack/graphlq-golang/graph/generated"
 	"github.com/glyphack/graphlq-golang/graph/model"
-	"github.com/glyphack/graphlq-golang/internal/auth"
 	"github.com/glyphack/graphlq-golang/internal/links"
 	"github.com/glyphack/graphlq-golang/internal/users"
 	"github.com/glyphack/graphlq-golang/pkg/jwt"
 )
 
+// func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) (*model.Link, error) {
+// 	user := auth.ForContext(ctx)
+// 	if user == nil {
+// 		return &model.Link{}, fmt.Errorf("access denied")
+// 	}
+// 	var link links.Link
+// 	link.Title = input.Title
+// 	link.Address = input.Address
+// 	link.User = user
+// 	linkId := link.Save()
+// 	grahpqlUser := &model.User{
+// 		ID:   user.ID,
+// 		Name: user.Username,
+// 	}
+// 	return &model.Link{ID: strconv.FormatInt(linkId, 10), Title: link.Title, Address: link.Address, User: grahpqlUser}, nil
+// }
+
 func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) (*model.Link, error) {
-	user := auth.ForContext(ctx)
-	if user == nil {
-		return &model.Link{}, fmt.Errorf("access denied")
-	}
 	var link links.Link
 	link.Title = input.Title
 	link.Address = input.Address
-	link.User = user
-	linkId := link.Save()
-	grahpqlUser := &model.User{
-		ID:   user.ID,
-		Name: user.Username,
-	}
-	return &model.Link{ID: strconv.FormatInt(linkId, 10), Title: link.Title, Address: link.Address, User: grahpqlUser}, nil
+	linkID := link.Save()
+	return &model.Link{ID: strconv.FormatInt(linkID, 10), Title: link.Title, Address: link.Address}, nil
 }
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (string, error) {
@@ -78,11 +86,13 @@ func (r *queryResolver) Links(ctx context.Context) ([]*model.Link, error) {
 	var dbLinks []links.Link
 	dbLinks = links.GetAll()
 	for _, link := range dbLinks {
-		grahpqlUser := &model.User{
-			Name: link.User.Password,
-		}
-		resultLinks = append(resultLinks, &model.Link{ID: link.ID, Title: link.Title, Address: link.Address, User: grahpqlUser})
+		// grahpqlUser := &model.User{
+		// 	Name: link.User.Password,
+		// }
+		resultLinks = append(resultLinks, &model.Link{ID: link.ID, Title: link.Title, Address: link.Address})
 	}
+	bss, _ := json.MarshalIndent(resultLinks, "", "	")
+	fmt.Printf("%v\n", string(bss))
 	return resultLinks, nil
 }
 
